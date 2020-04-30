@@ -38,17 +38,17 @@ firstCheckPoint(sf::Vector2f((float)windowWidth, LANE_HEIGHT)),
 //Initialize the second checkpoint using the size of the first checkpoint
 secondCheckPoint(firstCheckPoint),
 
-timeText("TIME", AssetManager::get().getFont(FontNames::Fonts::ARCADE_N), 30),
+timeText("TIME", AssetManager::get().getDefaultFont(Fonts::ARCADE_N), 30),
 
-oneUpText("1-UP", AssetManager::get().getFont(FontNames::Fonts::ARCADE_N), 30),
+oneUpText("1-UP", AssetManager::get().getDefaultFont(Fonts::ARCADE_N), 30),
 
-highScoreText("HI-SCORE", AssetManager::get().getFont(FontNames::Fonts::ARCADE_N), 30),
+highScoreText("HI-SCORE", AssetManager::get().getDefaultFont(Fonts::ARCADE_N), 30),
 
 timeLeft( {windowWidth / 2.f, LANE_HEIGHT / 2.f} ),
 
-secondsText("", AssetManager::get().getFont(FontNames::Fonts::CALIBRI_B)),
+secondsText("", AssetManager::get().getDefaultFont(Fonts::CALIBRI_B)),
 
-score("0", AssetManager::get().getFont(FontNames::Fonts::ARCADE_N), 30)
+score("0", AssetManager::get().getDefaultFont( Fonts::ARCADE_N), 30)
 {
 	timer.startTimer();
 	initializeCheckPoints();
@@ -299,11 +299,13 @@ void Game::initializeLogs(){
 
 //In the actual game, the turtles are in lanes 1 and 4, so only these lanes will be added to the lane of logs
 void Game::initializeTurtles(){
-	//The first lane of turtles will be just above the second checkpoint.
-	laneOfTurtles.push_back(Lane<Turtles>({ 0, secondCheckPoint.getPosition().y - LANE_HEIGHT }, { (float)windowSize.x, LANE_HEIGHT }));
+	//The starting position of the first lane of turtles will be the one just above the second checkpoint.
+	float startingPos = secondCheckPoint.getPosition().y - LANE_HEIGHT;
+
+	laneOfTurtles.push_back(Lane<Turtles>({ 0, startingPos }, { (float)windowSize.x, LANE_HEIGHT }));
 
 	//The second lane of turtles will be the fourth lane above the second checkpoint
-	laneOfTurtles.push_back(Lane<Turtles>({ 0, secondCheckPoint.getPosition().y - LANE_HEIGHT * 4 }, { (float)windowSize.x, LANE_HEIGHT }));
+	laneOfTurtles.push_back(Lane<Turtles>({ 0, startingPos * 4 }, { (float)windowSize.x, LANE_HEIGHT }));
 
 	//We will iterate through all of two turtles lol
 	for (int lane = 0; lane < laneOfTurtles.size(); lane++){
@@ -384,7 +386,6 @@ void Game::handleFrogCarCollision(){
 					livesShapes.pop_back();
 				}
 			}
-
 		}
 }
 
@@ -392,15 +393,11 @@ void Game::attachFrogToEntity(){
 	//Start checking for the frogs collision with the logs and turtles only when it has cross the second checkpoint.
 	if (frog.getBody().getPosition().y < secondCheckPoint.getPosition().y) {
 		for (auto &lane : laneOfTurtles) {
-			for (auto& turtles : lane.getEntities())
-				if (frog.attachTo(turtles, windowSize))
-					std::cout << "Frog in water!\n";
+			lane.attachFrogToLaneEntities(frog, windowSize);
 		}
 
 		for (auto &lane : laneOfLogs) {
-			for (auto &log : lane.getEntities())
-				if (!frog.attachTo(log, windowSize))
-					std::cout << "Frog in water!\n";
+			lane.attachFrogToLaneEntities(frog, windowSize);
 		}	
 	}
 }

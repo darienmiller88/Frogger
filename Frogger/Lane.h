@@ -2,7 +2,8 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
-#include "Car.h"
+#include "Frog.h"
+
 
 /*
 * Lane class to keep track of the cars, logs and turtles in the game. Each lane object will have its own list of entities.
@@ -40,6 +41,11 @@ class Lane{
 		void unpauseEntities() {
 			for (auto &entity : entities)
 				entity.unpause();
+		}
+
+		void attachFrogToLaneEntities(Frog &frog, const sf::Vector2u& windowSize) {
+			for (auto& entity : entities)
+				frog.attachTo(entity, windowSize);
 		}
 
 		int getNumEnities() const {

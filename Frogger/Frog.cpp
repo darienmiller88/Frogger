@@ -48,7 +48,7 @@ bool Frog::attachTo(const Entity &entityToAttachTo, const sf::Vector2u &windowSi
 		body.move(entityToAttachTo.getHorizontalSpeed(), 0);
 		static int count = 0;
 		count++;
-		if (dynamic_cast<Log*>(const_cast<Entity*>(&entityToAttachTo)) != nullptr and count % 400 == 0) {
+		if (dynamic_cast<Log*>(const_cast<Entity*>(&entityToAttachTo)) != nullptr and count % 50000 == 0) {
 			std::cout << "attached to a log!\n";
 		}
 		

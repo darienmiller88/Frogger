@@ -26,8 +26,8 @@ void Turtles::moveEntity(const sf::Vector2f &windowSize, const sf::Event &e){
 	actualSpeed *= (isEntityPaused) ? 0 : 1;
 
 	for (auto &turtle : turtles) {
-		turtle.move(actualSpeed, 0);
-
+		(isEntityPaused) ? turtle.move(0, 0) : turtle.move(HORIZONTAL_SPEED, 0);
+		//turtle.move(actualSpeed, 0);
 		respawnEntity(static_cast<sf::Vector2u>(windowSize));
 	}
 }
@@ -35,9 +35,10 @@ void Turtles::moveEntity(const sf::Vector2f &windowSize, const sf::Event &e){
 void Turtles::respawnEntity(const sf::Vector2u &windowSize){
 	//This is the disance the object has to move off screen in order for it to be redrawn on the other side. It's Mostly arbrirary lol.
 	const float TOTAL_DISTANCE_OFF_SCREEN = DISTANCE_OFFSCREEN + turtles.front().getSize().x;
+	const float DISTANCE_MOVED = turtles.back().getSize().x;
 
 	//when the LAST turtle has moved the of the left side of the window, respawn all the turtles on the right side.
-	if (turtles.back().getPosition().x + turtles.back().getSize().x < -TOTAL_DISTANCE_OFF_SCREEN) {
+	if (turtles.back().getPosition().x + turtles.back().getSize().x < -(DISTANCE_MOVED * 2)) {
 
 		//Set only the front turtle to right side of the screen, and then in a loop, have the other turtles follow suit.
 		turtles.front().setPosition(static_cast<float>(windowSize.x), turtles.front().getPosition().y);	
