@@ -14,9 +14,11 @@ windowSize(windowWidth, windowHeight),
 //as well as even. If it were to be 17 for example, the collision detection would happen one lane over.
 NUM_LANES(16),
 
+//Time in seconds to finish the level
 TIME_TO_PLAY(30.f),
 
-TIME_LEFT_LENGTH(windowWidth / 2.f),
+//Length of the time bar at the bottom of the screen
+TIME_BAR_LENGTH(windowWidth / 2.f),
 
 //initialize the lane height to the height of the window / numberOfLanes. This will allow NUM_LANES - 1 lanes to fit in the 
 //window perfectly.
@@ -88,10 +90,10 @@ void Game::update(const sf::Time &deltaTime){
 	timer.runTimer();
 
 	//If the frog intersects the first checkpoint, set its respawn point to that checkpoint
-	if (firstCheckPoint.getGlobalBounds().intersects(sf::FloatRect(frog.getBody().getPosition(), frog.getBody().getSize())))
+	if (firstCheckPoint.getPosition().y == frog.getBody().getPosition().y)
 		frog.setRespawnPoint({ windowSize.x / 2.f, firstCheckPoint.getPosition().y });
 	//Do the same for the second checkpoint!
-	else if (secondCheckPoint.getGlobalBounds().intersects(sf::FloatRect(frog.getBody().getPosition(), frog.getBody().getSize())))
+	else if (secondCheckPoint.getPosition().y == frog.getBody().getPosition().y)
 		frog.setRespawnPoint({ windowSize.x / 2.f, secondCheckPoint.getPosition().y });
 
 	float newWidth = 0.f;
@@ -99,7 +101,7 @@ void Game::update(const sf::Time &deltaTime){
 	//Only map to the newWidth variable when the clock hasn't reached the desire time. This will prevent the time bar (timeLeft) from 
 	//decreasing in reverse.
 	if (timer.getElaspedTime().asSeconds() <= TIME_TO_PLAY )
-		newWidth = mapper(timer.getElaspedTime().asSeconds(), 0.f, TIME_TO_PLAY, TIME_LEFT_LENGTH, 0.f);
+		newWidth = mapper(timer.getElaspedTime().asSeconds(), 0.f, TIME_TO_PLAY, TIME_BAR_LENGTH, 0.f);
 
 	//Resize the width of the time bar proportionally to the increasing clock time. This will create the illusion that the bar is shrinking
 	//over time!
@@ -281,9 +283,9 @@ void Game::initializeLogs(){
 		for (int j = 0; j < NUM_LOGS; j++) {
 			sf::Color c(160, 82, 45);
 
-			if (j == NUM_LOGS - 1) {
+			/*if (j == NUM_LOGS - 1) {
 				c = sf::Color(78, 255, 120);
-			}
+			}*/
 				
 			Log log({ LOG_LENGTH, LANE_HEIGHT }, { windowSize.x / 2.f - (DISTANCE_BETWEEN_LOGS * j), laneOfLogs[lane - 1].getPosition().y },
 				MOVEMENT_SPEED, DISTANCE_BETWEEN_LOGS, c);
@@ -305,7 +307,7 @@ void Game::initializeTurtles(){
 	laneOfTurtles.push_back(Lane<Turtles>({ 0, startingPos }, { (float)windowSize.x, LANE_HEIGHT }));
 
 	//The second lane of turtles will be the fourth lane above the second checkpoint
-	laneOfTurtles.push_back(Lane<Turtles>({ 0, startingPos * 4 }, { (float)windowSize.x, LANE_HEIGHT }));
+	laneOfTurtles.push_back(Lane<Turtles>({ 0, startingPos - (LANE_HEIGHT * 3) }, { (float)windowSize.x, LANE_HEIGHT }));
 
 	//We will iterate through all of two turtles lol
 	for (int lane = 0; lane < laneOfTurtles.size(); lane++){
@@ -320,7 +322,7 @@ void Game::initializeTurtles(){
 		const int NUM_TURTLES = (lane == 0) ? 3 : 2 ;
 
 		sf::Vector2f firstTurtlePosition(windowSize.x / 2.f, laneOfTurtles[lane].getPosition().y);
-
+		std::cout << "lane " << lane << " turtle pos: " << firstTurtlePosition.y << "\n";
 		for (int j = 0; j < NUM_TURTLE_GROUPS; j++){
 			Turtles turtles({ LANE_HEIGHT, LANE_HEIGHT }, firstTurtlePosition, MOVEMENT_SPEED, DISTANCE_BETWEEN_TURTLE_GROUPS, 
 				NUM_TURTLES, sf::Color::Red);
@@ -328,10 +330,11 @@ void Game::initializeTurtles(){
 			//After the first group of turtles is created, adjust the x position so that the next group of frogs will be a certain distance
 			//away from the "Turtles" object in front of it.
 			firstTurtlePosition.x = turtles.getPosition().x + DISTANCE_BETWEEN_TURTLE_GROUPS;
-
 			laneOfTurtles[lane].addEntityToLane(turtles);
 		}
 	}
+
+	std::cout << "num lane of turtles: " << laneOfTurtles.size() << "\n";
 }
 
 void Game::initializeHomeTiles(){
